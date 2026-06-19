@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MV — Nakidots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background: #000;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* ── 전체 UI 레이어 (마우스 없으면 사라짐) ── */
+    .mv-ui {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.6s ease;
+    }
+    .mv-ui.hidden {
+      opacity: 0;
+    }
+    .mv-ui.hidden * {
+      pointer-events: none !important;
+    }
+    .mv-ui:not(.hidden) * {
+      pointer-events: auto;
+    }
+
+    /* ── Back 버튼 ── */
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 200;
+      font-family: 'NUEcriture';
+      font-size: 14px;
+      color: #fff;
+      opacity: 1;
+      letter-spacing: 0.5px;
+      transition: opacity 0.2s ease;
+      cursor: pointer;
+    }
+    .back-btn:hover { opacity: 1; }
+
+    /* ── 영상 ── */
+    .mv-container {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mv-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border: none;
+    }
+
+    /* ── 하단 컨트롤 바 ── */
+    .mv-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 28px 28px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* 재생 바 */
+    .progress-wrap {
+      position: relative;
+      height: 20px;           /* 히트 영역 확대 */
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .progress-track {
+      position: relative;
+      width: 100%;
+      height: 2px;
+      background: rgba(255,255,255,1);
+    }
+    .progress-fill {
+      height: 100%;
+      background: #fff;
+      width: 0%;
+      pointer-events: none;
+    }
+    /* 드래그 핸들 */
+    .progress-handle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    .progress-wrap:hover .progress-handle,
+    .progress-wrap.dragging .progress-handle {
+      opacity: 1;
+    }
+
+    /* 하단 버튼 행 */
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    /* 재생/일시정지 */
+    .btn-play {
+      background: none;
+      border: none;
+      color: #fff;
+      font-family: 'NUEcriture';
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      opacity: 1;
+      cursor: pointer;
+      padding: 0;
+      transition: opacity 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-play:hover { opacity: 1; }
+
+    /* 타임 표시 */
+    .mv-time {
+      font-family: 'NUEcriture';
+      font-size: 14px;
+      color: #fff;
+      opacity: 1;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 영상 -->
+  <div class="mv-container" id="mvContainer">
+    <video id="mvVideo" playsinline poster="images/mv_thumb.jpg">
+      <source src="https://github.com/ryoodayeon/Nakidots/releases/download/v1.0/default.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- UI (Back + 컨트롤) -->
+  <div class="mv-ui" id="mvUi">
+    <a href="index.html" class="back-btn">Back</a>
+
+    <div class="mv-controls">
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+          <div class="progress-handle" id="progressHandle"></div>
+        </div>
+      </div>
+      <div class="controls-row">
+        <button class="btn-play" id="btnPlay">Play</button>
+        <span class="mv-time" id="mvTime">0:00 / 0:00</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const video       = document.getElementById('mvVideo');
+    const ui          = document.getElementById('mvUi');
+    const btnPlay     = document.getElementById('btnPlay');
+    const progressWrap  = document.getElementById('progressWrap');
+    const progressFill  = document.getElementById('progressFill');
+    const progressHandle= document.getElementById('progressHandle');
+    const mvTime        = document.getElementById('mvTime');
+
+    // ── 마우스 이동 → UI / 커서 표시, idle 후 숨김 ──
+    let hideTimer = null;
+
+    function showUI() {
+      ui.classList.remove('hidden');
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        ui.classList.add('hidden');
+      }, 2500);
+    }
+
+    document.addEventListener('mousemove', showUI);
+
+    document.addEventListener('mouseleave', () => {
+      ui.classList.add('hidden');
+      clearTimeout(hideTimer);
+    });
+
+    // ── 재생 / 일시정지 ──
+    function fmt(s) {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60).toString().padStart(2, '0');
+      return `${m}:${sec}`;
+    }
+
+    function updatePlayBtn() {
+      btnPlay.textContent = video.paused ? 'Play' : 'Pause';
+    }
+
+    btnPlay.addEventListener('click', () => {
+      video.paused ? video.play() : video.pause();
+    });
+
+    // 영상 클릭으로도 재생/일시정지
+    document.getElementById('mvContainer').addEventListener('click', () => {
+      video.paused ? video.play() : video.pause();
+    });
+
+    video.addEventListener('playing', updatePlayBtn);
+    video.addEventListener('pause', updatePlayBtn);
+
+    // ── 진행 바 ──
+    let isSeeking = false;
+
+    function getTrackRect() {
+      return progressWrap.querySelector('.progress-track').getBoundingClientRect();
+    }
+
+    function seekTo(clientX) {
+      if (!video.duration) return;
+      const rect = getTrackRect();
+      const pct  = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      video.currentTime = pct * video.duration;
+      updateProgress(pct);
+    }
+
+    function updateProgress(pct) {
+      const p = pct ?? (video.duration ? video.currentTime / video.duration : 0);
+      progressFill.style.width       = (p * 100) + '%';
+      progressHandle.style.left      = (p * 100) + '%';
+      mvTime.textContent = `${fmt(video.currentTime)} / ${fmt(video.duration || 0)}`;
+    }
+
+    video.addEventListener('timeupdate', () => updateProgress());
+
+    // 마우스
+    progressWrap.addEventListener('mousedown', e => {
+      isSeeking = true;
+      progressWrap.classList.add('dragging');
+      seekTo(e.clientX);
+    });
+    document.addEventListener('mousemove', e => {
+      if (!isSeeking) return;
+      seekTo(e.clientX);
+    });
+    document.addEventListener('mouseup', () => {
+      isSeeking = false;
+      progressWrap.classList.remove('dragging');
+    });
+
+    // 터치
+    progressWrap.addEventListener('touchstart', e => {
+      isSeeking = true;
+      progressWrap.classList.add('dragging');
+      seekTo(e.touches[0].clientX);
+    }, { passive: true });
+    progressWrap.addEventListener('touchmove', e => {
+      if (!isSeeking) return;
+      seekTo(e.touches[0].clientX);
+    }, { passive: true });
+    progressWrap.addEventListener('touchend', () => {
+      isSeeking = false;
+      progressWrap.classList.remove('dragging');
+    });
+
+    // 스페이스바
+    document.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        video.paused ? video.play() : video.pause();
+      }
+    });
+  </script>
+
+</body>
+</html>

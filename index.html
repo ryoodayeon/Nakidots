@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nakidots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+  <!-- 커서 -->
+  <div class="cursor-mv" id="cursorMv">Click 2 MV</div>
+
+  <!-- 비주얼라이저 비디오 -->
+  <div class="video-container" id="videoContainer">
+    <video class="bg-video" id="bgVideo" autoplay loop muted playsinline disablepictureinpicture>
+      <source src="https://github.com/ryoodayeon/Nakidots/releases/download/v1.0/nakidots_vis_compressed.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- 우측 상단 네비게이션 -->
+  <nav class="home-nav">
+    <a href="lyrics.html">Lyrics</a>
+    <a href="behind.html">Behind</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <script>
+    const cursorEl = document.getElementById('cursorMv');
+    const bgVideo  = document.getElementById('bgVideo');
+
+    document.addEventListener('mousemove', e => {
+      cursorEl.style.left = e.clientX + 'px';
+      cursorEl.style.top  = e.clientY + 'px';
+      cursorEl.style.opacity = '1';
+    });
+
+    document.addEventListener('mouseleave', () => {
+      cursorEl.style.opacity = '0';
+    });
+
+    document.getElementById('videoContainer').addEventListener('click', () => {
+      window.location.href = 'mv.html';
+    });
+
+    // 모바일 autoplay 강제 시작
+    document.addEventListener('touchstart', () => {
+      if (bgVideo.paused) bgVideo.play();
+    }, { once: true });
+  </script>
+
+</body>
+</html>

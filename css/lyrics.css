@@ -1,0 +1,264 @@
+/* ── Scrollbar 숨김 ── */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Page base ── */
+body {
+  background: #000000;
+  color: #ffffff;
+}
+
+/* ── 스캔 선 ── */
+.center-line {
+  position: fixed;
+  top: 15vh; /* JS가 덮어씀, 혹시 에러 시 fallback */
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #F7FFFC;
+  filter: blur(5px);
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* ── 돌아가기 버튼 ── */
+.back-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 200;
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  color: #fff;
+  opacity: 1;
+  letter-spacing: 0.5px;
+}
+.back-btn:hover {
+  opacity: 1;
+}
+
+/* ── 가사 컨테이너 ── */
+.lyrics-container {
+  position: relative;
+}
+
+/* ── 드래그 선택 방지 ── */
+.lyrics-container,
+.lyric-text,
+.lyric-img {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ── 가사 아이템 ── */
+.lyric-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  padding-left: 50%;
+  padding-right: 120px;
+  overflow: visible;
+  z-index: 1;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+.lyric-item.active {
+  opacity: 1;
+  z-index: 50;
+}
+
+/* ── 텍스트 (오른쪽) ── */
+.lyric-text {
+  font-family: 'NUEcriture';
+  font-size: 20px;
+  letter-spacing: 0.2px;
+  text-align: left;
+}
+.lyric-item--chorus .lyric-text {
+  font-size: 19px;
+}
+
+/* ── 이미지 (왼쪽, 절대 위치) ── */
+.lyric-img {
+  position: absolute;
+  left: 120px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: calc(50vw - 160px);
+  height: calc((50vw - 160px) * 0.6667);
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
+/* ── Spacer ── */
+.lyric-spacer {
+  min-height: 30px;
+}
+
+/* ── Lightbox ── */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.lightbox.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 확대 이미지 wrap — JS가 가사 위치에 맞게 top 지정 */
+.lightbox-img-wrap {
+  position: absolute;
+  left: 120px;
+  transform: translateY(-50%);
+  width: calc(62vw - 120px);
+  z-index: 1;
+}
+.lightbox-img {
+  display: block;
+  width: 100%;
+  max-height: 82vh;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 이전/다음 커서 존 */
+.lightbox-prev-zone,
+.lightbox-next-zone {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  z-index: 1;
+}
+.lightbox-prev-zone { top: 0;    cursor: n-resize; }
+.lightbox-next-zone { bottom: 0; cursor: s-resize; }
+
+/* 캡션 — body.lb-open 가사 텍스트 시작 위치(65vw)와 동일, top은 JS가 가사 아이템 하단 기준으로 지정 */
+.lightbox-caption {
+  position: absolute;
+  left: 65vw;
+  right: 120px;
+  z-index: 1;
+  text-align: left;
+  color: #fff;
+  line-height: 1.75;
+  pointer-events: none;
+}
+.lightbox-caption .caption-quote {
+  display: block;
+  font-family: 'NUEcriture';
+  font-size: 20px;
+  opacity: 1;
+  margin-bottom: 12px;
+}
+.lightbox-caption .caption-attr {
+  display: block;
+  font-family: 'NUEcriture';
+  font-size: 16px;
+  opacity: 0.75;
+  letter-spacing: 0.3px;
+}
+
+/* 닫기 버튼 */
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  font-family: 'NUEcriture';
+  font-size: 22px;
+  color: #fff;
+  opacity: 0.5;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  line-height: 1;
+}
+.lightbox-close:hover {
+  opacity: 1;
+}
+
+/* 캡션 링크 */
+.lightbox-caption a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  pointer-events: auto;
+}
+
+/* 라이트박스 열렸을 때 가사 오른쪽으로 임시 이동 */
+body.lb-open .lyric-item {
+  padding-left: 65%;
+  opacity: 0.1;
+  transition: padding-left 0.3s ease, opacity 0.3s ease;
+}
+
+/* 라이트박스 열렸을 때 컨테이너 오버레이 위로 */
+body.lb-open .lyrics-container {
+  z-index: 500;
+  pointer-events: none;
+}
+
+/* 해당 가사만 더 선명하게 */
+body.lb-open .lyric-item.active {
+  opacity: 0.75;
+}
+
+/* 라이트박스 열렸을 때 작은 이미지 숨김 (lightbox-img만 표시) */
+body.lb-open .lyric-img {
+  visibility: hidden;
+}
+
+/* ── 모바일 뷰포트 ── */
+@media (max-width: 800px) {
+  .lyric-item {
+    padding-right: 16px;
+  }
+  .lyric-img {
+    left: 60px;
+    width: calc(50vw - 76px);
+    height: calc((50vw - 76px) * 0.6667);
+  }
+  .lyric-text {
+    font-size: 18px;
+  }
+  .lyric-item--chorus .lyric-text {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 500px) {
+
+  .back-btn {
+    top: 16px;
+    left: 16px;
+  }
+  .lyric-item {
+    padding-right: 10px;
+  }
+  .lyric-img {
+    left: 16px;
+    width: calc(50vw - 26px);
+    height: calc((50vw - 26px) * 0.6667);
+  }
+  .lyric-text {
+    font-size: 14px;
+  }
+  .lyric-item--chorus .lyric-text {
+    font-size: 13px;
+  }
+}

@@ -1,0 +1,86 @@
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar { display: none; }
+
+body {
+  background: #000;
+  color: #fff;
+}
+
+.back-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 200;
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  color: #fff;
+  opacity: 1;
+  letter-spacing: 0.5px;
+}
+.back-btn:hover { opacity: 1; }
+
+@media (max-width: 500px) {
+  .back-btn {
+    top: 16px;
+    left: 16px;
+  }
+}
+
+.contact-wrap {
+  padding: 80px 20px 160px;
+}
+
+.contact-page-label {
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  opacity: 0.35;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+.contact-section {
+  margin-bottom: 44px;
+}
+
+.contact-entry {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.contact-entry:last-child {
+  margin-bottom: 0;
+}
+
+.contact-label {
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  opacity: 0.4;
+  line-height: 1.4;
+}
+
+.contact-value {
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  opacity: 0.65;
+  line-height: 1.4;
+  transition: opacity 0.2s ease;
+}
+
+.contact-value:hover {
+  opacity: 1;
+}
+
+.contact-value--static {
+  pointer-events: none;
+}
+
+.contact-copyright {
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  opacity: 0.35;
+  line-height: 1.4;
+}
