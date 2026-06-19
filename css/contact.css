@@ -78,6 +78,15 @@ body {
   pointer-events: none;
 }
 
+@keyframes blink {
+  0%, 100% { opacity: 0.65; }
+  50%       { opacity: 0.1; }
+}
+
+.contact-value--blink {
+  animation: blink 1.6s ease-in-out infinite;
+}
+
 .contact-copyright {
   font-family: 'NUEcriture';
   font-size: 14px;
