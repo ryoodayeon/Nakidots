@@ -59,6 +59,36 @@ body:has(.home-nav a:hover) #cursorMv {
 }
 
 
+/* ── 모바일 전용 Click 2 MV ── */
+.mobile-mv-link {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .video-container {
+    display: none;
+  }
+  .cursor-mv {
+    display: none;
+  }
+  body {
+    cursor: auto;
+  }
+  .mobile-mv-link {
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'NUEcriture';
+    font-size: 16px;
+    color: #fff;
+    white-space: nowrap;
+    z-index: 10;
+    animation: cursor-pulse var(--pulse-duration) ease-in-out infinite;
+  }
+}
+
 /* ── 우측 상단 네비게이션 ── */
 .home-nav {
   position: fixed;

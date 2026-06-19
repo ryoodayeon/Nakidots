@@ -1,4 +1,5 @@
-videos/
+videos/*.mp4
+!videos/vis.mp4
 .DS_Store
 .claude/
 .vscode/
