@@ -48,10 +48,13 @@
       window.location.href = 'mv.html';
     });
 
-    // 모바일 autoplay 강제 시작
-    document.addEventListener('touchstart', () => {
-      if (bgVideo.paused) bgVideo.play();
-    }, { once: true });
+    // 모바일 autoplay 강제 시작 (iOS는 첫 터치 후 재생)
+    function tryPlay() {
+      if (bgVideo.paused) bgVideo.play().catch(() => {});
+    }
+    bgVideo.play().catch(() => {});
+    document.addEventListener('touchstart', tryPlay, { once: true });
+    document.addEventListener('touchend', tryPlay, { once: true });
   </script>
 
 </body>

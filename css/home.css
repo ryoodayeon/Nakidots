@@ -65,9 +65,6 @@ body:has(.home-nav a:hover) #cursorMv {
 }
 
 @media (max-width: 800px) {
-  .video-container {
-    display: none;
-  }
   .cursor-mv {
     display: none;
   }
