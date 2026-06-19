@@ -84,19 +84,24 @@ window.addEventListener('wheel', e => {
 
 // ── 터치: 스와이프로 한 칸씩 이동 ───────────────────────────────
 let touchStartY = 0;
+let touchStartX = 0;
+let touchMoved  = false;
 window.addEventListener('touchstart', e => {
   touchStartY = e.touches[0].clientY;
+  touchStartX = e.touches[0].clientX;
+  touchMoved  = false;
 }, { passive: true });
 window.addEventListener('touchmove', e => {
-  e.preventDefault();  // 스와이프 중 자연 스크롤 차단
+  touchMoved = true;
+  e.preventDefault();
 }, { passive: false });
 window.addEventListener('touchend', e => {
   if (lbIndex >= 0) return;
   const dy = touchStartY - e.changedTouches[0].clientY;
-  if (Math.abs(dy) > 30) {
+  if (touchMoved && Math.abs(dy) > 30) {
     goTo(targetIndex + (dy > 0 ? 1 : -1));
-  } else {
-    goTo(activeIndex);  // 살짝 건드렸으면 현재 위치로 재snap
+  } else if (!touchMoved) {
+    goTo(activeIndex);
   }
 }, { passive: true });
 
@@ -227,10 +232,19 @@ function lightboxNext() { openLightbox(lbIndex + 1); }
 navImages.forEach(({ img }, i) => {
   img.style.cursor = 'pointer';
   img.addEventListener('click', (e) => { e.stopPropagation(); openLightbox(i); });
+  img.addEventListener('touchend', (e) => {
+    if (touchMoved) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openLightbox(i);
+  }, { passive: false });
   img.addEventListener('dblclick', e => e.stopPropagation());
 });
 
 document.getElementById('lightboxPrev').addEventListener('click', (e) => { e.stopPropagation(); lightboxPrev(); });
+document.getElementById('lightboxPrev').addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); lightboxPrev(); }, { passive: false });
 document.getElementById('lightboxNext').addEventListener('click', (e) => { e.stopPropagation(); lightboxNext(); });
+document.getElementById('lightboxNext').addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); lightboxNext(); }, { passive: false });
 
 lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+lightbox.addEventListener('touchend', (e) => { if (e.target === lightbox) { e.preventDefault(); closeLightbox(); } }, { passive: false });
