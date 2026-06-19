@@ -1,0 +1,185 @@
+/* ── Scrollbar 숨김 ── */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar { display: none; }
+
+body {
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* ── 돌아가기 버튼 ── */
+.back-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 200;
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  color: #fff;
+  opacity: 1;
+  letter-spacing: 0.5px;
+}
+.back-btn:hover { opacity: 1; }
+
+@media (max-width: 500px) {
+  .back-btn {
+    top: 16px;
+    left: 16px;
+  }
+}
+
+/* ── Archive container ── */
+.archive {
+  padding: 80px 0 160px 0;
+}
+
+/* ── Entry row: 텍스트 컬럼 + 이미지 스택 ── */
+.entry-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 0;
+}
+
+/* 대주제: left 20px 시작, width 160px */
+.col-major {
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  width: 160px;
+  flex-shrink: 0;
+  padding-left: 20px;
+  box-sizing: border-box;
+  opacity: 0.7;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* 중주제: left 160px, width 180px → 합산 340px */
+.col-mid {
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  width: 180px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* 소주제 + 이미지 스택: left 340px ~ */
+.col-right {
+  flex: 1;
+  min-width: 0;
+}
+
+.sub-label {
+  display: block;
+  font-family: 'NUEcriture';
+  font-size: 14px;
+  opacity: 0.7;
+  line-height: 1.4;
+  margin-bottom: 5px;
+}
+
+/* ── Image stack (collapsed → expanded 모두 같은 요소) ── */
+.img-stack {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: transform 5.5s ease;
+  /* width / overflow 는 JS가 open 시 직접 지정 */
+}
+
+.img-stack.open {
+  cursor: grab;
+}
+
+/* ── Thumbnails ── */
+.stack-thumb {
+  height: 80px;
+  width: auto;
+  opacity: 0.5;
+  flex-shrink: 0;
+  margin-right: -40px;
+  vertical-align: top;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: height 0s ease, margin-right 0.1s ease, opacity 1s ease;
+}
+
+.stack-thumb:last-child {
+  margin-right: 0;
+}
+
+
+/* 확장 상태: 높이 고정, 너비 자동 (가로/세로 모두 자연 비율) */
+.img-stack.open .stack-thumb {
+  height: 320px;
+  width: auto;
+  margin-right: 20px;
+  opacity: 1;
+}
+
+.img-stack.open .stack-thumb:last-child {
+  margin-right: 0;
+}
+
+@media (max-width: 800px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .archive {
+    padding: 60px 0 100px;
+  }
+
+  .entry-row {
+    flex-direction: column;
+    padding: 10px 16px;
+  }
+
+  .col-major {
+    width: auto;
+    padding-left: 0;
+    white-space: normal;
+    font-size: 11px;
+    margin-bottom: 1px;
+  }
+
+  .col-mid {
+    width: auto;
+    white-space: normal;
+    font-size: 11px;
+    margin-bottom: 1px;
+  }
+
+  .sub-label {
+    font-size: 11px;
+  }
+
+  .entry-new-major:not(:first-child) {
+    margin-top: 28px;
+  }
+
+  /* 기본(접힌) 상태: 겹친 썸네일 그대로, 네이티브 가로 스와이프 */
+  .img-stack {
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 스크롤바 숨김 */
+  .img-stack::-webkit-scrollbar { display: none; }
+  .img-stack { scrollbar-width: none; }
+
+  /* 열린 상태: 스냅 적용 */
+  .img-stack.open {
+    scroll-snap-type: x mandatory;
+  }
+
+  .img-stack.open .stack-thumb {
+    scroll-snap-align: start;
+    height: 213px;
+  }
+}

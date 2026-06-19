@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nakidots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+  <!-- 커서 -->
+  <div class="cursor-mv" id="cursorMv">Click 2 MV</div>
+
+  <!-- 모바일 전용 클릭 버튼 -->
+  <a href="mv.html" class="mobile-mv-btn">Click 2 MV</a>
+
+  <!-- 비주얼라이저 비디오 -->
+  <div class="video-container" id="videoContainer">
+    <video class="bg-video" autoplay loop muted playsinline>
+      <source src="videos/nakidots_vis.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- 우측 상단 네비게이션 -->
+  <nav class="home-nav">
+    <a href="lyrics.html">Lyrics</a>
+    <a href="behind.html">Behind</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <script>
+    const cursorEl = document.getElementById('cursorMv');
+
+    document.addEventListener('mousemove', e => {
+      cursorEl.style.left = e.clientX + 'px';
+      cursorEl.style.top  = e.clientY + 'px';
+      cursorEl.style.opacity = '1';
+    });
+
+    document.addEventListener('mouseleave', () => {
+      cursorEl.style.opacity = '0';
+    });
+
+    document.getElementById('videoContainer').addEventListener('click', () => {
+      window.location.href = 'mv.html';
+    });
+  </script>
+
+</body>
+</html>
