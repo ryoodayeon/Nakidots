@@ -240,13 +240,15 @@
     }
 
     function updateProgress(pct) {
-      const p = pct ?? (video.duration ? video.currentTime / video.duration : 0);
-      progressFill.style.width       = (p * 100) + '%';
-      progressHandle.style.left      = (p * 100) + '%';
-      mvTime.textContent = `${fmt(video.currentTime)} / ${fmt(video.duration || 0)}`;
+      const dur = isFinite(video.duration) ? video.duration : 0;
+      const p = pct !== undefined ? pct : (dur > 0 ? video.currentTime / dur : 0);
+      progressFill.style.width  = (p * 100) + '%';
+      progressHandle.style.left = (p * 100) + '%';
+      mvTime.textContent = `${fmt(video.currentTime)} / ${fmt(dur)}`;
     }
 
     video.addEventListener('timeupdate', () => updateProgress());
+    video.addEventListener('durationchange', () => updateProgress());
 
     // 마우스
     progressWrap.addEventListener('mousedown', e => {
