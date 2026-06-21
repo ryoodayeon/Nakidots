@@ -23,6 +23,11 @@
     </video>
   </div>
 
+  <!-- 배경 오디오 -->
+  <audio id="bgAudio" loop preload="auto">
+    <source src="audio/vis_audio.m4a" type="audio/mp4">
+  </audio>
+
   <!-- 우측 상단 네비게이션 -->
   <nav class="home-nav">
     <a href="lyrics.html">Lyrics</a>
@@ -34,21 +39,30 @@
     const cursorEl = document.getElementById('cursorMv');
     const bgVideo  = document.getElementById('bgVideo');
 
+    let audioStarted = false;
+
     document.addEventListener('mousemove', e => {
       cursorEl.style.left = e.clientX + 'px';
       cursorEl.style.top  = e.clientY + 'px';
-      cursorEl.style.opacity = '1';
+      if (audioStarted) cursorEl.style.opacity = '1';
     });
 
     document.addEventListener('mouseleave', () => {
       cursorEl.style.opacity = '0';
     });
 
-    document.getElementById('videoContainer').addEventListener('click', () => {
-      window.location.href = 'mv.html';
-    });
+    const bgAudio = document.getElementById('bgAudio');
 
     bgVideo.play().catch(() => {});
+
+    document.getElementById('videoContainer').addEventListener('click', () => {
+      if (!audioStarted) {
+        bgAudio.play().catch(() => {});
+        audioStarted = true;
+      } else {
+        window.location.href = 'mv.html';
+      }
+    });
   </script>
 
 </body>
