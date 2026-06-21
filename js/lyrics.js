@@ -1,6 +1,6 @@
 const centerLine = document.getElementById('centerLine');
 const container  = document.getElementById('lyricsContainer');
-const items      = Array.from(document.querySelectorAll('.lyric-item'));
+const items       = Array.from(document.querySelectorAll('.lyric-item'));
 
 const LINE_START = 0.15;
 const LINE_END   = 0.85;
@@ -66,20 +66,12 @@ window.addEventListener('resize', init);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', init);
 init();
 
-// ── 휠: 한 칸씩 이동 ──────────────────────────────────────────────
-let wheelAccum = 0;
-let wheelFlush = null;
+// ── 휠: 한 번에 한 칸씩 이동 ─────────────────────────────────────
 window.addEventListener('wheel', e => {
   e.preventDefault();
   if (isAnimating) return;
-  wheelAccum += e.deltaY;
-  clearTimeout(wheelFlush);
-  wheelFlush = setTimeout(() => { wheelAccum = 0; }, 300);
-  if (Math.abs(wheelAccum) >= 50) {
-    const dir = wheelAccum > 0 ? 1 : -1;
-    wheelAccum = 0;
-    goTo(targetIndex + dir);
-  }
+  if (Math.abs(e.deltaY) < 3) return;
+  goTo(targetIndex + (e.deltaY > 0 ? 1 : -1));
 }, { passive: false });
 
 // ── 터치: 스와이프로 한 칸씩 이동 ───────────────────────────────
@@ -248,3 +240,37 @@ document.getElementById('lightboxNext').addEventListener('touchend', (e) => { e.
 
 lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 lightbox.addEventListener('touchend', (e) => { if (e.target === lightbox) { e.preventDefault(); closeLightbox(); } }, { passive: false });
+
+// ── 스캔선 드래그 → 위치에서 스냅 ──────────────────────────────────
+let isDragging      = false;
+let dragStartY      = 0;
+let dragStartScroll = 0;
+
+centerLine.addEventListener('mousedown', e => {
+  if (lbIndex >= 0) return;
+  isDragging      = true;
+  dragStartY      = e.clientY;
+  dragStartScroll = window.scrollY;
+  document.body.style.userSelect = 'none';
+  e.preventDefault();
+});
+
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const ms        = maxScroll();
+  if (ms <= 0) return;
+  const h         = winH();
+  const lineRange = (LINE_END - LINE_START) * h;
+  const delta     = (e.clientY - dragStartY) / lineRange * ms;
+  window.scrollTo({ top: Math.max(0, Math.min(ms, dragStartScroll + delta)), behavior: 'instant' });
+});
+
+window.addEventListener('mouseup', () => {
+  if (!isDragging) return;
+  isDragging = false;
+  document.body.style.userSelect = '';
+  // 가장 가까운 가사 항목으로 스냅
+  const best = snapPos.reduce((bi, pos, i) =>
+    Math.abs(pos - window.scrollY) < Math.abs(snapPos[bi] - window.scrollY) ? i : bi, 0);
+  goTo(best);
+});

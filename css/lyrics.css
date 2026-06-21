@@ -23,7 +23,16 @@ body {
   background: #F7FFFC;
   filter: blur(5px);
   z-index: 100;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: ns-resize;
+}
+.center-line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10px;
+  bottom: -10px;
 }
 
 /* ── 돌아가기 버튼 ── */
