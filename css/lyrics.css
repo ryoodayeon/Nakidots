@@ -107,6 +107,14 @@ body {
   cursor: pointer;
 }
 
+@keyframes img-flicker {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.1; }
+}
+.lyric-img:hover {
+  animation: img-flicker 1.6s ease-in-out infinite;
+}
+
 /* ── Spacer ── */
 .lyric-spacer {
   min-height: 30px;
@@ -165,6 +173,12 @@ body {
   color: #fff;
   line-height: 1.75;
   pointer-events: none;
+  max-height: 38vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.lightbox-caption::-webkit-scrollbar {
+  display: none;
 }
 .lightbox-caption .caption-quote {
   display: block;

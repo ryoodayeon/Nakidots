@@ -168,9 +168,12 @@ const navImages = Array.from(document.querySelectorAll('.lyric-img'))
 function openLightbox(index) {
   if (index < 0 || index >= navImages.length) return;
   if (lbIndex === index) return;
+  const isNavigating = lbIndex >= 0;
   lbIndex = index;
   const { img, src } = navImages[index];
 
+  // 이전 이미지 즉시 제거 후 새 이미지 로드
+  lightboxImg.removeAttribute('src');
   lightboxImg.src = src;
 
   const item = img.closest('.lyric-item');
@@ -179,7 +182,10 @@ function openLightbox(index) {
     window.scrollTo({ top: snapPos[itemIndex] ?? 0, behavior: 'instant' });
     activeIndex = itemIndex;
     targetIndex = itemIndex;
+    // 라이트박스 내 이미지 전환 시 텍스트 트랜지션 없이 즉시 교체
+    if (isNavigating) items.forEach(el => (el.style.transition = 'none'));
     items.forEach((el, i) => el.classList.toggle('active', i === itemIndex));
+    if (isNavigating) requestAnimationFrame(() => items.forEach(el => (el.style.transition = '')));
     centerLine.style.top = getLineY() + 'px';
   }
 
@@ -188,9 +194,18 @@ function openLightbox(index) {
 
   if (item) {
     const itemRect = item.getBoundingClientRect();
-    lightboxCaption.style.top = (itemRect.bottom + 6) + 'px';
+    if (ly >= winH() * 0.5) {
+      // 스캔선이 중앙 이하 → 캡션을 아이템 위로
+      lightboxCaption.style.top    = 'auto';
+      lightboxCaption.style.bottom = (winH() - itemRect.top + 6) + 'px';
+    } else {
+      // 스캔선이 중앙 위 → 캡션을 아이템 아래로
+      lightboxCaption.style.top    = (itemRect.bottom + 6) + 'px';
+      lightboxCaption.style.bottom = 'auto';
+    }
   } else {
-    lightboxCaption.style.top = (ly + 44) + 'px';
+    lightboxCaption.style.top    = (ly + 44) + 'px';
+    lightboxCaption.style.bottom = 'auto';
   }
 
   const num = src.match(/\/(\d+)\.jpg/)?.[1];
