@@ -67,11 +67,14 @@ if (window.visualViewport) window.visualViewport.addEventListener('resize', init
 init();
 
 // ── 휠: 한 번에 한 칸씩 이동 ─────────────────────────────────────
+let wheelAccum = 0;
 window.addEventListener('wheel', e => {
   e.preventDefault();
-  if (isAnimating) return;
-  if (Math.abs(e.deltaY) < 3) return;
-  goTo(targetIndex + (e.deltaY > 0 ? 1 : -1));
+  if (isAnimating) { wheelAccum = 0; return; }
+  wheelAccum += e.deltaY;
+  if (Math.abs(wheelAccum) < 30) return;
+  goTo(targetIndex + (wheelAccum > 0 ? 1 : -1));
+  wheelAccum = 0;
 }, { passive: false });
 
 // ── 터치: 스와이프로 한 칸씩 이동 ───────────────────────────────
